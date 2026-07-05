@@ -1,0 +1,58 @@
+\section{Limpieza y Preparación de Datos}
+
+Cada transformación aplicada responde a un hallazgo concreto de la etapa de exploración (Sección \ref{sec:dataset}), no a un procedimiento genérico.
+
+\subsection*{Corrección de nombre de columna}
+
+Se corrigió el error tipográfico detectado en la columna de potencia AC del inversor 15, para que siga el mismo patrón que el resto de las columnas y pueda incluirse de forma consistente en operaciones agregadas (p. ej. \texttt{sum} sobre todas las columnas \texttt{*\_ac\_power\_*}):
+
+\begin{minted}{python}
+df = df.rename(columns={
+    'inv_15_ac_power_iinv_149653': 'inv_15_ac_power_inv_149653'
+})
+\end{minted}
+
+\subsection*{Imputación de valores nulos}
+
+Los nulos (183\,372 celdas, 0.024\% del total) se imputaron con \textbf{0} en lugar de con la media o interpolación. Justificación: un nulo en una señal eléctrica de un inversor corresponde a un intervalo en que ese inversor estuvo fuera de línea (sin comunicación); imputar con la media o con el valor previo simularía una generación de energía que en realidad no ocurrió, sesgando al alza tanto el EDA como los modelos predictivos.
+
+\begin{minted}{python}
+df[feature_cols] = df[feature_cols].fillna(0)
+\end{minted}
+
+\subsection*{Variable objetivo y variables derivadas}
+
+\begin{itemize}
+    \item \texttt{total\_ac\_power}: suma de la potencia AC de los 24 inversores. Es la variable objetivo del modelo supervisado y de la serie de tiempo del forecasting.
+    \item \texttt{total\_dc\_current}, \texttt{total\_ac\_current}, \texttt{avg\_ac\_voltage}: variables agregadas de planta usadas únicamente para el análisis de correlación (Sección \ref{sec:relaciones}), no como entradas del modelo (para evitar redundancia con las señales por inversor).
+    \item \texttt{hour}, \texttt{month}, \texttt{year}: extraídas de \texttt{measured\_on} para capturar el patrón solar diurno y la estacionalidad anual.
+\end{itemize}
+
+\begin{minted}{python}
+power_cols = [c for c in df.columns if 'ac_power' in c]
+df['total_ac_power'] = df[power_cols].sum(axis=1, min_count=1)
+df['hour']  = df['measured_on'].dt.hour
+df['month'] = df['measured_on'].dt.month
+df['year']  = df['measured_on'].dt.year
+\end{minted}
+
+\subsection*{Filtro de horas sin generación (solo para el modelo supervisado)}
+
+De noche, las 119 señales eléctricas son 0 por definición física (sin irradiancia solar no hay generación). Conservar estas filas en el conjunto de entrenamiento del modelo supervisado añadiría un patrón trivial y constante que no aporta a la tarea real de predicción; por ello se filtran únicamente para esa etapa (se conservan en el EDA y en el forecasting, donde sí son relevantes):
+
+\begin{minted}{python}
+df_day = df[df['total_ac_power'] > 0].copy()
+\end{minted}
+
+Esto redujo el conjunto de 632\,952 a 309\,308 filas ($\approx$49\% del total) para el modelado supervisado.
+
+\subsection*{Escalamiento}
+
+Se aplicó \texttt{StandardScaler} a las variables de entrada y a la variable objetivo antes de entrenar el MLP y la Regresión Lineal, requerido porque ambos algoritmos son sensibles a la escala relativa de las variables (el descenso de gradiente del MLP converge de forma más estable, y los coeficientes de la regresión lineal se vuelven comparables entre sí). Random Forest, al ser un modelo basado en árboles, no requiere escalamiento, pero se usaron los mismos datos escalados para mantener la comparación de métricas sobre exactamente el mismo particionamiento de datos.
+
+\subsection*{Resumen del estado final}
+
+\begin{itemize}
+    \item Dataset completo (EDA y forecasting): 632\,952 filas $\times$ 122 columnas (119 originales + \texttt{total\_ac\_power}, \texttt{hour}, \texttt{month}, \texttt{year}), sin nulos tras la imputación.
+    \item Dataset filtrado (modelo supervisado): 309\,308 filas $\times$ 95 variables de entrada.
+\end{itemize}

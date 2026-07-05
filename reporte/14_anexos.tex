@@ -1,0 +1,29 @@
+\section*{Anexos}
+\addcontentsline{toc}{section}{Anexos}
+
+\subsection*{A. Fuente del dataset}
+
+\begin{itemize}
+    \item Archivo: \texttt{2107\_electrical\_data.csv}
+    \item Contenido: mediciones eléctricas cada 5 minutos de 24 inversores de una planta solar fotovoltaica (nov-2017 a nov-2023).
+    \item Fuente: proporcionado por la cátedra de Minería de Datos. % TODO: sustituir por la referencia/URL oficial indicada por el profesor si aplica.
+\end{itemize}
+
+\subsection*{B. Carga de datos (fragmento)}
+
+\begin{minted}{python}
+import pandas as pd
+
+df = pd.read_csv('2107_electrical_data.csv', parse_dates=['measured_on'])
+power_cols = [c for c in df.columns if 'ac_power' in c]
+df['total_ac_power'] = df[power_cols].sum(axis=1, min_count=1)
+\end{minted}
+
+\subsection*{C. Reproducibilidad}
+
+\begin{itemize}
+    \item Notebook: \texttt{plan\_mineria.ipynb} (raíz del repositorio)
+    \item Figuras exportadas en: \texttt{figuras/}
+    \item Entorno: Python 3.14, \texttt{pandas}, \texttt{numpy}, \texttt{scikit-learn}, \texttt{statsmodels}, \texttt{PyTorch}, \texttt{seaborn}, \texttt{matplotlib}
+    \item Colocar \texttt{2107\_electrical\_data.csv} en la raíz del repositorio (junto al notebook) antes de ejecutar; el archivo no se incluye en el repositorio por su tamaño (\textasciitilde 400\,MB).
+\end{itemize}

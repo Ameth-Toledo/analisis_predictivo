@@ -1,0 +1,14 @@
+# Dataset pesado (no se incluye en el repositorio, ver README)
+2107_electrical_data.csv
+
+# Entornos virtuales
+.venv/
+__pycache__/
+*.pyc
+
+# Checkpoints de Jupyter
+.ipynb_checkpoints/
+
+# Artefactos de modelos entrenados / logs
+*.pth
+exec_log*.txt

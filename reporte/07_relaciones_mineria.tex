@@ -1,0 +1,46 @@
+\section{Relaciones entre Variables}
+\label{sec:relaciones}
+
+\subsection*{Correlación entre variables agregadas de planta}
+
+Se calcularon variables agregadas de planta (\texttt{total\_dc\_current}, \texttt{total\_ac\_current}, \texttt{avg\_ac\_voltage}) únicamente para este análisis de correlación —no se usan como entrada de los modelos predictivos, para evitar redundancia con las señales por inversor—, y se relacionaron con \texttt{total\_ac\_power} y la hora del día mediante correlación de \textbf{Spearman} (robusta a la relación no lineal esperada y a la gran masa de ceros nocturnos).
+
+\begin{minted}{python}
+agg_vars = df[['total_dc_current', 'total_ac_current',
+               'avg_ac_voltage', 'total_ac_power', 'hour']].dropna()
+corr = agg_vars.corr(method='spearman')
+\end{minted}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{fig_correlacion_agregada.png}
+\caption{Correlación de Spearman entre variables agregadas de planta.}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lr}
+\toprule
+\textbf{Par de variables} & \textbf{Spearman $\rho$} \\
+\midrule
+\texttt{total\_dc\_current} — \texttt{total\_ac\_power} & 0.987 \\
+\texttt{total\_ac\_current} — \texttt{total\_ac\_power} & 0.984 \\
+\texttt{avg\_ac\_voltage} — \texttt{total\_ac\_power} & 0.890 \\
+\texttt{hour} — \texttt{total\_ac\_power} & 0.111 \\
+\bottomrule
+\end{tabular}
+\caption{Correlaciones de Spearman más relevantes con la variable objetivo}
+\end{table}
+
+Las corrientes DC y AC muestran una correlación monótona casi perfecta con la potencia total ($\rho > 0.98$), consistente con la relación física $P \approx V \cdot I$. El voltaje promedio también correlaciona fuerte (0.890), aunque en parte porque cae a 0 simultáneamente con la potencia durante la noche, más que por una variación proporcional durante el día.
+
+Llama la atención que la correlación de Spearman entre \texttt{hour} y \texttt{total\_ac\_power} es baja (0.111) pese al patrón diurno evidente de la Sección \ref{sec:descriptivo}: esto \textbf{no} indica ausencia de relación, sino una limitación conocida del coeficiente de Spearman, que solo captura relaciones \textit{monótonas}. La potencia sube y luego baja a lo largo del día (relación de forma de campana, no monótona), por lo que un coeficiente de correlación de rango subestima una relación que sí es fuerte pero no unidireccional.
+
+\subsection*{Relación esperada: corriente $\rightarrow$ potencia}
+
+Físicamente, la potencia AC es proporcional al producto de corriente y voltaje ($P = V \cdot I$); dado que el voltaje AC varía poco (Sección \ref{sec:descriptivo}), se espera que la corriente sea el principal factor que explica las variaciones de potencia. Esto se confirma tanto en la matriz de correlación como en el análisis de importancia de variables del modelo supervisado (Sección \ref{sec:supervisado}), donde las corrientes DC/AC dominan sobre los voltajes como predictores de \texttt{total\_ac\_power}.
+
+\subsection*{Relación con la hora del día}
+
+La fuerte asociación entre \texttt{hour} y \texttt{total\_ac\_power} confirma el patrón diurno ya observado en la Sección \ref{sec:descriptivo}, y motiva su inclusión como variable de entrada tanto en el modelo supervisado como en la construcción de la serie de tiempo para forecasting.

@@ -1,0 +1,15 @@
+\section{Conclusiones}
+\label{sec:conclusiones}
+
+Se aplicó un proceso completo de ciencia de datos —comprensión, exploración, preparación, modelado y evaluación— sobre el dataset eléctrico de una planta solar fotovoltaica de 24 inversores (632\,952 registros, $\sim$6 años a 5 minutos de resolución).
+
+\begin{itemize}
+    \item Se identificaron y corrigieron problemas de calidad de datos concretos (nulos por inversores fuera de línea, una asimetría estructural entre inversores y un error tipográfico en un nombre de columna), documentando y justificando cada transformación aplicada.
+    \item Se demostró que la potencia AC total de la planta puede predecirse con altísima precisión (R\textsuperscript{2} = 0.9992) a partir únicamente de las señales eléctricas de entrada de los inversores. De forma reveladora, el modelo más simple (Regresión Lineal) superó a Random Forest y al MLP, evidenciando que la relación buscada es casi algebraica ($P \approx V \cdot I$) y que, en ese régimen, mayor complejidad no implica mejor desempeño.
+    \item El análisis no supervisado segmentó los 24 inversores en 3 clústeres e identificó a los inversores \textbf{04 y 07} como un grupo claramente atípico (mayor tiempo fuera de línea, picos de potencia anómalos), coincidiendo con lo observado en el EDA descriptivo; adicionalmente, se marcó un 1.99\% de los registros diurnos como anómalos, aportando valor diagnóstico independiente de la predicción.
+    \item El pronóstico semanal con Holt-Winters aprovechó la fuerte estacionalidad anual de la generación solar, superando a un baseline ingenuo estacional (MAPE 21.79\% vs. 29.64\%).
+\end{itemize}
+
+\subsection*{Aportación del trabajo}
+
+Más allá de aplicar un algoritmo aislado, este trabajo integra sobre un mismo dataset industrial de alta frecuencia las tres perspectivas de minería de datos solicitadas —predicción supervisada, diagnóstico no supervisado y forecasting— mostrando cómo cada una responde a una pregunta de negocio distinta (cuánto se genera, qué componentes requieren atención, y cuánto se generará a futuro) a partir de la misma fuente de datos eléctricos, sin depender de variables externas ni de un historial de fallas etiquetado.

@@ -1,0 +1,32 @@
+\section{Evaluación General}
+\label{sec:evaluacion}
+
+Se integran aquí las métricas de las tres líneas de análisis desarrolladas, evaluadas siempre sobre datos no vistos durante el entrenamiento (conjuntos de prueba o semanas futuras).
+
+\subsection*{Aprendizaje supervisado}
+
+El modelo seleccionado (Regresión Lineal) alcanzó un R\textsuperscript{2} de 0.9992 y un RMSE de 6.94 W en el conjunto de prueba (Sección \ref{sec:supervisado}, Tabla de comparación de modelos).
+
+\subsection*{Aprendizaje no supervisado}
+
+El agrupamiento de los 24 inversores en 3 clústeres y la detección de anomalías (1.99\% de los registros diurnos) proporcionan un mecanismo de diagnóstico complementario, sin necesidad de datos etiquetados de fallas (Sección \ref{sec:no_supervisado}).
+
+\subsection*{Forecasting}
+
+El modelo Holt-Winters superó al baseline ingenuo estacional con un MAPE de 21.79\% frente a 29.64\% (Sección \ref{sec:forecasting}), confirmando que la estacionalidad anual de la generación solar es explotable para la planeación a mediano plazo.
+
+\subsection*{Síntesis}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Línea de análisis} & \textbf{Métrica principal} & \textbf{Resultado} \\
+\midrule
+Supervisado (predicción de potencia) & R\textsuperscript{2} / RMSE & 0.9992 / 6.94 W \\
+No supervisado (diagnóstico) & \% registros anómalos & 1.99\% \\
+Forecasting (energía semanal) & MAPE & 21.79\% \\
+\bottomrule
+\end{tabular}
+\caption{Resumen de evaluación de las tres líneas de análisis}
+\end{table}

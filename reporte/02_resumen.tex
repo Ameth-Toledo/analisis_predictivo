@@ -1,0 +1,10 @@
+\section*{Resumen}
+\addcontentsline{toc}{section}{Resumen}
+
+Este documento presenta un proceso completo de minería de datos —comprensión, exploración, preparación, modelado y evaluación— sobre \texttt{2107\_electrical\_data.csv}, un dataset de 632\,952 registros (5 minutos de resolución, $\sim$6 años) con las señales eléctricas de los 24 inversores de una planta solar fotovoltaica.
+
+Tras identificar y corregir problemas de calidad (nulos por inversores fuera de línea, una asimetría estructural entre inversores y un error tipográfico en un nombre de columna), se desarrollaron tres líneas de análisis complementarias: (1) un modelo \textbf{supervisado} que predice la potencia AC total de la planta a partir de sus señales de entrada, comparando Regresión Lineal, Random Forest y un Perceptrón Multicapa entrenado con \texttt{PyTorch}; (2) un análisis \textbf{no supervisado} que segmenta los 24 inversores por perfil de desempeño (K-Means sobre componentes de PCA) y detecta registros anómalos (Isolation Forest); y (3) un modelo de \textbf{forecasting} (Holt-Winters) que pronostica la energía semanal generada, aprovechando la estacionalidad anual del recurso solar.
+
+El mejor modelo supervisado (Regresión Lineal) alcanzó un R\textsuperscript{2} de 0.9992 en el conjunto de prueba, y el modelo de forecasting superó al baseline ingenuo estacional con un MAPE de 21.79\%. El periodo analizado abarca de noviembre de 2017 a noviembre de 2023.
+
+\newpage

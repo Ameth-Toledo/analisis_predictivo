@@ -1,0 +1,23 @@
+\section{Discusión}
+\label{sec:discusion}
+
+\subsection*{Sobre el aprendizaje supervisado}
+
+El resultado más relevante de esta comparación es, precisamente, que \textbf{el modelo más simple (Regresión Lineal) fue el de mejor desempeño}, por un margen claro sobre Random Forest y sobre el MLP. Esto no es un fracaso de los modelos más complejos, sino un hallazgo interpretable: la potencia AC de cada inversor es, aproximadamente, el producto de su corriente y voltaje de salida ($P \approx V \cdot I$), y con 98 variables de entrada que incluyen las corrientes y voltajes de los 24 inversores, una combinación lineal de esas variables ya aproxima muy bien esa relación casi algebraica —hay poco margen para que la capacidad adicional de un modelo no lineal se traduzca en menor error, y sí margen para que introduzca varianza adicional (p. ej. el \textit{Dropout} del MLP, diseñado para prevenir sobreajuste, penaliza a un problema con muy poco ruido real). Este es un recordatorio importante en minería de datos: la complejidad del modelo debe elegirse en función de la naturaleza de la relación subyacente, no asumirse como sinónimo de mejor desempeño.
+
+\subsection*{Sobre el aprendizaje no supervisado}
+
+El agrupamiento reveló que no todos los inversores se comportan igual pese a estar en la misma planta y recibir, en principio, la misma irradiancia solar. Esto es consistente con diferencias reales de operación: orientación/sombreado parcial de subarreglos de paneles, degradación desigual de módulos o inversores, y posibles fallas intermitentes de comunicación. La detección de anomalías, al no requerir un historial de fallas etiquetado, es especialmente útil en un escenario realista donde ese historial rara vez existe o está incompleto.
+
+\subsection*{Sobre el forecasting}
+
+Holt-Winters aprovecha la fuerte estacionalidad anual del recurso solar, pero es un modelo univariado: no ``sabe'' nada sobre nubosidad, mantenimiento programado o expansión de capacidad de la planta. Su error se concentra, previsiblemente, en semanas con condiciones climáticas atípicas respecto a los años de entrenamiento.
+
+\subsection*{Limitaciones generales}
+
+\begin{itemize}
+    \item El dataset no incluye variables meteorológicas externas (irradiancia, temperatura ambiente, nubosidad) que explicarían una porción relevante de la variabilidad no capturada por los modelos.
+    \item La imputación de nulos con 0 asume que todo valor faltante corresponde a un inversor apagado; esto es razonable dado el contexto físico, pero no es verificable de forma independiente con la información disponible en el dataset.
+    \item El Random Forest se entrenó sobre una submuestra de 150\,000 registros (de 309\,308 disponibles) para mantener tiempos de entrenamiento razonables; un entrenamiento con el conjunto completo podría mejorar marginalmente su desempeño.
+    \item El número de clústeres de inversores ($k=3$) se fijó de forma exploratoria; un análisis con distinto número de clústeres o con series de tiempo completas por inversor (en vez de solo su resumen estadístico) podría refinar la segmentación.
+\end{itemize}
